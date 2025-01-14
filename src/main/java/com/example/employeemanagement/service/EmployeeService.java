@@ -35,7 +35,7 @@ public class EmployeeService {
 
         if (employeeOptional.isPresent()) {
             Employee employeeToUpdate = employeeOptional.get();
-            if(employeeToUpdate.update(employee)){
+            if (employeeToUpdate.update(employee)) {
                 return employeeRepository.save(employee);
             }
         }
@@ -45,5 +45,9 @@ public class EmployeeService {
 
     public void deleteEmployee(Long id) {
         employeeRepository.deleteById(id);
+    }
+
+    public List<Employee> searchEmployees(String fullName, String employeeId, String department, String jobTitle) {
+        return employeeRepository.searchEmployee(fullName, employeeId, department, jobTitle);
     }
 }
