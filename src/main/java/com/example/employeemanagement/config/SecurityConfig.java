@@ -1,22 +1,21 @@
 package com.example.employeemanagement.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.User;
+import com.example.employeemanagement.entities.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @EnableWebSecurity
 @Configuration
@@ -28,15 +27,11 @@ public class SecurityConfig  {
 				.csrf(AbstractHttpConfigurer::disable)
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/login", "/register").permitAll()
-						.requestMatchers("/admin/**").hasRole("ADMIN")
-						.requestMatchers("/manager/**").hasRole("MANAGER")
-						.requestMatchers("/employees/**").hasAnyRole("ADMIN", "HR_PERSONNEL", "MANAGER")
+						.requestMatchers("/employees/**").hasAnyRole("ADMIN", "HR", "MANAGER")
 						.anyRequest().authenticated()
 				)
 				.formLogin(form -> form
-						.loginPage("/login")
-						.loginProcessingUrl("/login")
-						.defaultSuccessUrl("/home", true)
+						.defaultSuccessUrl("/employees", true)
 						.permitAll()
 				)
 				.logout(logout -> logout
@@ -56,13 +51,31 @@ public class SecurityConfig  {
 				.password(passwordEncoder().encode("adminpassword"))
 				.roles("ADMIN")
 				.build();
+		UserDetails hr = User.builder()
+				.username("hr")
+				.password(passwordEncoder().encode("hrpassword"))
+				.roles("HR")
+				.build();
+		UserDetails manager = User.builder()
+				.username("manager")
+				.password(passwordEncoder().encode("managerpassword"))
+				.roles("MANAGER")
+				.department("IT")
+				.build();
 
-		return new InMemoryUserDetailsManager(admin);
+        List<UserDetails> userDetails = new ArrayList<>(List.of(admin, hr, manager));
+
+		return new InMemoryUserDetailsManager(userDetails);
 	}
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
+	}
+
+	@Bean
+	public MethodSecurityExpressionHandler expressionHandler() {
+        return new DefaultMethodSecurityExpressionHandler();
 	}
 }
 

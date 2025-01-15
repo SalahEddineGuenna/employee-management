@@ -8,13 +8,16 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Set;
 
 @Entity
 @Table(name = "role")
 @Data
+@NoArgsConstructor
 public class Role {
 
 	@Id
@@ -23,12 +26,9 @@ public class Role {
 
 	private String name;
 
-	@ManyToMany(mappedBy = "roles")
-	private Set<User> users;
+	public Role(String name) {
+		this.name = name;
+	}
 
-	@ElementCollection(fetch = FetchType.EAGER)
-	private Set<String> permissions;
-
-	// Getters and setters
 }
 

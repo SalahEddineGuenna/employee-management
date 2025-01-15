@@ -33,14 +33,14 @@ public class EmployeeController {
 
 
     @GetMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_HR') or (hasRole('ROLE_MANAGER') and @securityService.hasManagerDepartmentAccess(#employee.department))")
     public ResponseEntity<List<EmployeeDto>> getAllEmployees() {
         List<EmployeeDto> employeeDtos = employeeMapper.toDtos(employeeService.getAllEmployees());
         return ResponseEntity.ok(employeeDtos); // 200 OK
     }
 
     @GetMapping(value = "/{id}")
-    @PreAuthorize("hasRole('HR') or hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('HR') or hasRole('ADMIN')")
     public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable long id) {
         EmployeeDto employeeDto = employeeMapper.toDto(employeeService.getEmployeeById(id));
         return ResponseEntity.ok(employeeDto); // 200 OK
